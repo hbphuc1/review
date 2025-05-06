@@ -1,0 +1,848 @@
+Huynh Bao Phuc
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Review Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: #f0f4f8;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    color: #222;
+    transition: all 0.3s ease;
+  }
+
+  header {
+    background: #4a90e2;
+    color: white;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    border-radius: 8px;
+    user-select: none;
+    box-shadow: 0 3px 6px rgba(74,144,226,0.4);
+    position: relative;
+  }
+
+  #toggle-view-btn {
+    position: absolute;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    background: #ffffffcc;
+    color: #4a90e2;
+    border: 2px solid #4a90e2;
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s, color 0.3s;
+  }
+  #toggle-view-btn:hover {
+    background: #4a90e2;
+    color: white;
+  }
+
+  main {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: 1.5rem;
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  label {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #444;
+    user-select: none;
+  }
+
+  #file-input {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    border: 2px solid #4a90e2;
+    border-radius: 6px;
+    cursor: pointer;
+    max-width: 300px;
+    transition: background-color 0.3s ease;
+  }
+  #file-input:hover {
+    background-color: #e1e9ff;
+  }
+
+  .mode-container {
+    margin-top: 10px;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .mode-container label {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .quiz-container {
+    display: none;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .question-number-and-jump {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 700;
+    color: #666;
+    font-size: 1.2rem;
+    user-select: none;
+  }
+
+  .jump-bubbles-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .jump-bubble {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e7eaf1;
+    color: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s, color 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+  .jump-bubble:hover {
+    background-color: #d0d8ff;
+  }
+  .jump-bubble.selected {
+    background-color: #4a90e2;
+    color: white;
+    font-weight: 700;
+  }
+  .jump-bubble.correct {
+    background-color: #b0e8a1; /* Green for correct answers */
+    color: #2b4a20;
+  }
+
+  .jump-bubble.incorrect {
+      background-color: #f9a1a1; /* Red for incorrect answers */
+      color: #6b1c1c;
+  }
+
+  .jump-arrow {
+    font-size: 1.1rem;
+    cursor: pointer;
+    user-select: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #e7eaf1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: background-color 0.3s;
+  }
+  .jump-arrow:hover:not(.disabled) {
+    background-color: #4a90e2;
+    color: white;
+  }
+  .jump-arrow.disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .question-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #222;
+    white-space: pre-wrap;
+    min-height: 90px;
+    line-height: 1.3;
+    margin-bottom: 1.5rem;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  button.option {
+    background: #e7eaf1;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s, border-color 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    font-weight: 500;
+    min-height: 60px;
+  }
+  button.option:hover:not(.disabled) {
+    background: #d0d8ff;
+  }
+  button.option.selected {
+    background: #c5d7ff;
+    border-color: #4a90e2;
+  }
+  button.option.correct {
+    background: #b0e8a1;
+    border-color: #3c763d;
+    color: #2b4a20;
+    font-weight: 700;
+  }
+  button.option.incorrect {
+    background: #f9a1a1;
+    border-color: #a94442;
+    color: #6b1c1c;
+    font-weight: 700;
+  }
+  button.option.disabled {
+    pointer-events: none;
+    opacity: 0.75;
+  }
+
+  .actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button#next-btn, button#restart-btn {
+    background: #4a90e2;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 1rem 1.75rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s;
+    min-width: 140px;
+    box-shadow: 0 3px 7px rgba(74,144,226,0.7);
+    letter-spacing: 0.04em;
+  }
+  button#next-btn:disabled {
+    background: #a0b9e7;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  button#next-btn:hover:not(:disabled),
+  button#restart-btn:hover {
+    background: #3163d6;
+  }
+
+  .timer {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #4a90e2;
+    user-select: none;
+    min-width: 140px;
+  }
+
+  /* Score screen */
+  .score-screen {
+    text-align: center;
+    padding: 1rem 2rem;
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .score-screen h2 {
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+    color: #4a90e2;
+  }
+  .score-screen p {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+    color: #333;
+  }
+  .score-screen button {
+    background: #4a90e2;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 1rem 1.75rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s;
+    min-width: 140px;
+    box-shadow: 0 3px 7px rgba(74,144,226,0.7);
+    letter-spacing: 0.04em;
+  }
+  .score-screen button:hover {
+    background: #3163d6;
+  }
+
+  /* Mobile View Styles */
+  body.mobile-view {
+    max-width: 100vw;
+    padding: 0;
+  }
+  body.mobile-view main {
+    margin-top: 0;
+    border-radius: 0;
+    padding: 1rem 1rem 1.5rem 1rem;
+    box-shadow: none;
+    max-width: 100vw;
+  }
+  body.mobile-view header {
+    font-size: 1.5rem;
+    padding: 1rem;
+    position: relative;
+    box-shadow: none;
+  }
+  body.mobile-view #toggle-view-btn {
+    position: fixed;
+    top: 0.6rem;
+    right: 0.6rem;
+    transform: none;
+    border-radius: 6px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.85rem;
+  }
+  body.mobile-view label {
+    font-size: 1rem;
+  }
+  body.mobile-view #file-input {
+    max-width: 100%;
+    font-size: 0.95rem;
+    padding: 0.4rem 0.6rem;
+  }
+  body.mobile-view .question-text {
+    font-size: 1.1rem;
+    min-height: 60px;
+    margin-bottom: 1rem;
+  }
+  body.mobile-view .question-number-and-jump {
+    font-size: 1rem;
+    gap: 0.5rem;
+  }
+  body.mobile-view .jump-bubble {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+  body.mobile-view .jump-arrow {
+    font-size: 1rem;
+    padding: 5px 8px;
+  }
+  body.mobile-view button.option {
+    font-size: 0.95rem;
+    padding: 0.65rem 1rem;
+    min-height: 50px;
+  }
+  body.mobile-view button#next-btn, body.mobile-view button#restart-btn {
+    font-size: 1rem;
+    min-width: 110px;
+    padding: 0.65rem 1.25rem;
+  }
+  body.mobile-view .timer {
+    font-size: 1rem;
+    min-width: 110px;
+  }
+  body.mobile-view .score-screen h2 {
+    font-size: 2rem;
+  }
+  body.mobile-view .score-screen p {
+    font-size: 1.2rem;
+  }
+</style>
+</head>
+<body>
+<header>
+  Review Quiz
+  <button id="toggle-view-btn">Switch to Mobile View</button>
+</header>
+<main>
+  <label for="file-input">Import Quiz Questions (.txt):</label>
+  <input type="file" id="file-input" accept=".txt" />
+  <div class="mode-container">
+    <label><input type="radio" name="mode" value="original" checked /> Original Order</label>
+    <label><input type="radio" name="mode" value="mixed" /> Mixed Questions & Answers</label>
+  </div>
+  <div class="quiz-container">
+    <div class="question-number-and-jump">
+      <span class="question-number">Question 1 of 5</span>
+      <div class="jump-bubbles-container" aria-label="Jump to question numbers">
+        <button class="jump-arrow" id="jump-prev" aria-label="Previous questions" disabled>&larr;</button>
+        <div id="jump-bubbles" style="display:flex; gap: 0.3rem;"></div>
+        <button class="jump-arrow" id="jump-next" aria-label="Next questions" disabled>&rarr;</button>
+      </div>
+    </div>
+    <div class="question-text">Loading question...</div>
+    <div class="options">
+      <!-- Options dynamically inserted here -->
+    </div>
+    <div class="actions">
+      <div class="timer">Time left: <span id="timer">300</span> sec</div>
+      <button id="next-btn" disabled>Next</button>
+    </div>
+  </div>
+  
+  <div class="review-screen" style="display: none;">
+    <h2>Review Your Answers</h2>
+    <div id="review-questions"></div>
+    <button id="finish-review-btn">Finish Review</button>
+  </div>
+
+  <div class="score-screen">
+    <h2>Your Score</h2>
+    <p>You scored <span id="score-value">0</span> out of <span id="score-total">0</span></p>
+    <button id="restart-btn">Try Again</button>
+  </div>
+</main>
+
+<script>
+  let originalQuestions = [];
+  let questions = [];
+  const questionNumberSpan = document.querySelector(".question-number");
+  const jumpBubblesContainer = document.getElementById("jump-bubbles");
+  const jumpPrevBtn = document.getElementById("jump-prev");
+  const jumpNextBtn = document.getElementById("jump-next");
+  const questionTextElem = document.querySelector(".question-text");
+  const optionsContainer = document.querySelector(".options");
+  const nextBtn = document.getElementById("next-btn");
+  const timerElem = document.getElementById("timer");
+  const scoreScreen = document.querySelector(".score-screen");
+  const quizContainer = document.querySelector(".quiz-container");
+  const scoreValueElem = document.getElementById("score-value");
+  const scoreTotalElem = document.getElementById("score-total");
+  const restartBtn = document.getElementById("restart-btn");
+  const fileInput = document.getElementById("file-input");
+  const toggleViewBtn = document.getElementById("toggle-view-btn");
+  const modeRadios = document.querySelectorAll('input[name="mode"]');
+  const body = document.body;
+
+
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let timer;
+  let timeLeft = 300;
+  let answered = false;
+
+  // Pagination for jump bubbles
+  let jumpPage = 0;  // 0-based page index
+  const PAGE_SIZE = 10;
+
+  fileInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const parsed = parseQuestions(text);
+        if (parsed.length > 0) {
+          originalQuestions = parsed;
+          applyMode();
+          resetQuiz();
+          quizContainer.style.display = "flex";
+          scoreScreen.style.display = "none";
+          jumpPage = 0;
+          renderJumpBubbles();
+          loadQuestion();
+        } else {
+          alert("Failed to parse questions from the file. Please check the file format.");
+        }
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  // Apply selected mode to set `questions`
+  function applyMode() {
+    const selectedMode = [...modeRadios].find(r => r.checked).value;
+    if (selectedMode === 'original') {
+      questions = originalQuestions.map(q => ({
+        question: q.question,
+        options: [...q.options],
+        answer: q.answer,
+        answered: false,
+        selectedIndex: null
+      }));
+    } else {
+      questions = originalQuestions.map(q => {
+        // Mix question order and answer order - for each question shuffle answers & adjust answer index accordingly
+        const indexes = q.options.map((_, i) => i);
+        shuffleArray(indexes);
+        const mixedOptions = indexes.map(i => q.options[i]);
+        const newAnswerIndex = indexes.findIndex(i => i === q.answer);
+        return {
+          question: q.question,
+          options: mixedOptions,
+          answer: newAnswerIndex,
+          answered: false,
+          selectedIndex: null
+        };
+      });
+      shuffleArray(questions); // Also mix question order
+    }
+  }
+
+  // Fisher-Yates shuffle
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  modeRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      if (originalQuestions.length === 0) return; // no questions loaded
+      applyMode();
+      resetQuiz();
+      jumpPage = 0;
+      renderJumpBubbles();
+      loadQuestion();
+      quizContainer.style.display = "flex";
+      scoreScreen.style.display = "none";
+    });
+  });
+  
+  function parseQuestions(text) {
+    const lines = text.split(/\r?\n/);
+    const questionsList = [];
+    let currentQuestion = null;
+
+    const questionRegex = /^\d+\.\s*(.+)/;
+    const answerRegex = /^(\*?)([A-Z])\.\s+(.+)/;
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return;
+
+      const qMatch = trimmed.match(questionRegex);
+      if (qMatch) {
+        if (currentQuestion) {
+          currentQuestion.question = currentQuestion.question.replace(/\n{2,}/g, '\n').trim();
+          questionsList.push(currentQuestion);
+        }
+        currentQuestion = { question: qMatch[1].trim(), options: [], answer: null, answered: false, selectedIndex: null };
+        return;
+      }
+
+      const aMatch = trimmed.match(answerRegex);
+      if (aMatch && currentQuestion) {
+        const isCorrect = aMatch[1] === '*';
+        const optionText = aMatch[3].trim();
+        currentQuestion.options.push(optionText);
+        if (isCorrect) {
+          currentQuestion.answer = currentQuestion.options.length - 1;
+        }
+        return;
+      }
+
+      if (currentQuestion) {
+        if (currentQuestion.options.length === 0) {
+          currentQuestion.question += '\n' + trimmed;
+        } else {
+          currentQuestion.options[currentQuestion.options.length - 1] += '\n' + trimmed;
+        }
+      }
+    });
+
+    if (currentQuestion) {
+      currentQuestion.question = currentQuestion.question.replace(/\n{2,}/g, '\n').trim();
+      questionsList.push(currentQuestion);
+    }
+
+    const valid = questionsList.every(q => q.answer !== null && q.answer >= 0 && q.answer < q.options.length);
+
+    if (!valid) {
+      return [];
+    }
+    return questionsList;
+  }
+
+  function startTimer() {
+    clearInterval(timer);
+    timeLeft = 60;
+    timerElem.textContent = timeLeft;
+    timerElem.style.color = "#4a90e2";
+    timer = setInterval(() => {
+      timeLeft--;
+      timerElem.textContent = timeLeft;
+      if (timeLeft <= 10) {
+        timerElem.style.color = "red";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        if (!answered) {
+          lockOptions();
+        }
+        nextBtn.disabled = false;
+      }
+    }, 1000);
+  }
+
+  function loadQuestion() {
+    console.log("loadQuestion called. currentQuestionIndex:", currentQuestionIndex);
+    clearInterval(timer);
+    answered = false;
+    nextBtn.disabled = true;
+    questionNumberSpan.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+    
+    // Call renderJumpBubbles here to update the navigation bar
+    renderJumpBubbles(); // Update jump bubbles to reflect current state
+    
+    const question = questions[currentQuestionIndex];
+    questionTextElem.textContent = question.question;
+    optionsContainer.innerHTML = "";
+
+    question.options.forEach((option, index) => {
+        const btn = document.createElement("button");
+        btn.classList.add("option");
+        btn.textContent = option;
+        btn.onclick = () => selectOption(index, btn);
+        optionsContainer.appendChild(btn);
+    });
+
+    if (question.answered) {
+        answered = true;
+        const correctIndex = question.answer;
+        const optionButtons = optionsContainer.querySelectorAll("button.option");
+        optionButtons.forEach((button, idx) => {
+            button.classList.add("disabled");
+            if (idx === correctIndex) {
+                button.classList.add("correct");
+            }
+            if (question.selectedIndex === idx && question.selectedIndex !== correctIndex) {
+                button.classList.add("incorrect");
+            }
+        });
+        nextBtn.disabled = false;
+        timerElem.textContent = timeLeft;
+    } else {
+        timeLeft = 60;
+        startTimer();
+    }
+  }
+
+  function renderJumpBubbles() {
+    jumpBubblesContainer.innerHTML = "";
+    const totalPages = Math.ceil(questions.length / PAGE_SIZE);
+
+    const startIdx = jumpPage * PAGE_SIZE;
+    const endIdx = Math.min(startIdx + PAGE_SIZE, questions.length);
+
+    for (let i = startIdx; i < endIdx; i++) {
+        const bubble = document.createElement("button");
+        bubble.className = "jump-bubble";
+
+        if (questions[i].answered) {
+            if (questions[i].selectedIndex === questions[i].answer) {
+                bubble.classList.add("correct");
+            } else {
+                bubble.classList.add("incorrect");
+            }
+        }
+
+        if (i === currentQuestionIndex) bubble.classList.add("selected");
+        bubble.textContent = i + 1;
+        bubble.setAttribute("aria-label", `Jump to question ${i + 1}`);
+        bubble.onclick = () => {
+            console.log("Jump bubble clicked:", i);
+            currentQuestionIndex = i;
+            console.log("currentQuestionIndex after click:", currentQuestionIndex);
+            loadQuestion();
+        };
+        jumpBubblesContainer.appendChild(bubble);
+    }
+
+    jumpPrevBtn.disabled = jumpPage === 0;
+    jumpNextBtn.disabled = jumpPage === totalPages - 1 || totalPages === 0;
+  }
+
+  jumpPrevBtn.addEventListener("click", () => {
+    console.log("Previous arrow clicked. jumpPage before:", jumpPage);
+    if (jumpPage > 0) {
+        jumpPage--;
+        console.log("jumpPage after decrement:", jumpPage);
+        renderJumpBubbles();
+        console.log("currentQuestionIndex before jump prev load:", currentQuestionIndex);
+        currentQuestionIndex = jumpPage * PAGE_SIZE;
+        console.log("currentQuestionIndex after jump prev load:", currentQuestionIndex);
+        loadQuestion();
+    }
+  });
+
+  jumpNextBtn.addEventListener("click", () => {
+    console.log("Next arrow clicked. jumpPage before:", jumpPage);
+    const totalPages = Math.ceil(questions.length / PAGE_SIZE);
+    if (jumpPage < totalPages - 1) {
+        jumpPage++;
+        console.log("jumpPage after increment:", jumpPage);
+        renderJumpBubbles();
+        console.log("currentQuestionIndex before jump next load:", currentQuestionIndex);
+        currentQuestionIndex = jumpPage * PAGE_SIZE;
+        console.log("currentQuestionIndex after jump next load:", currentQuestionIndex);
+        loadQuestion();
+    }
+  });
+
+  function selectOption(selectedIndex, btn) {
+    if (answered) return;
+    answered = true;
+    clearInterval(timer);
+    const question = questions[currentQuestionIndex];
+    const correctIndex = question.answer;
+    const optionButtons = optionsContainer.querySelectorAll("button.option");
+    optionButtons.forEach((button, idx) => {
+        button.classList.add("disabled");
+        if (idx === correctIndex) {
+            button.classList.add("correct");
+        }
+        if (idx === selectedIndex && selectedIndex !== correctIndex) {
+            button.classList.add("incorrect");
+        }
+    });
+    question.answered = true;
+    question.selectedIndex = selectedIndex;
+
+    if (selectedIndex === correctIndex) {
+        score++;
+    }
+    nextBtn.disabled = false;
+    renderJumpBubbles(); // Update the jump bubbles after answering
+  }
+
+
+  function lockOptions() {
+    const question = questions[currentQuestionIndex];
+    question.answered = true;
+    question.selectedIndex = null;
+    const correctIndex = question.answer;
+    const optionButtons = optionsContainer.querySelectorAll("button.option");
+    optionButtons.forEach((button, idx) => {
+      button.classList.add("disabled");
+      if (idx === correctIndex) {
+        button.classList.add("correct");
+      }
+    });
+    nextBtn.disabled = false;
+  }
+
+  nextBtn.addEventListener("click", () => {
+    console.log("Next button clicked. currentQuestionIndex before:", currentQuestionIndex);
+    currentQuestionIndex++;
+    console.log("currentQuestionIndex after increment:", currentQuestionIndex);
+    jumpPage = Math.floor(currentQuestionIndex / PAGE_SIZE);
+    console.log("jumpPage after next:", jumpPage);
+    if (currentQuestionIndex >= questions.length) {
+        showScore();
+    } else {
+        loadQuestion();
+    }
+  });
+
+  function showScore() {
+    score = questions.reduce((acc, q) => {
+      if (q.answered && q.selectedIndex === q.answer) return acc + 1;
+      return acc;
+    }, 0);
+
+    quizContainer.style.display = "none";
+    scoreScreen.style.display = "flex";
+    scoreValueElem.textContent = score;
+    scoreTotalElem.textContent = questions.length;
+  }
+
+  restartBtn.addEventListener("click", () => {
+    resetQuiz();
+    loadQuestion();
+    quizContainer.style.display = "flex";
+    scoreScreen.style.display = "none";
+  });
+
+  function resetQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    nextBtn.disabled = true;
+    clearInterval(timer);
+    questions.forEach(q => {
+      q.answered = false;
+      q.selectedIndex = null;
+    });
+    jumpPage = 0;
+  }
+  function showScore() {
+    // Existing code to show score
+    showReviewScreen();
+}
+
+  function showReviewScreen() {
+      scoreScreen.style.display = "none";
+      const reviewQuestionsContainer = document.getElementById("review-questions");
+      reviewQuestionsContainer.innerHTML = ""; // Clear previous review
+
+      questions.forEach((q, index) => {
+          const questionDiv = document.createElement("div");
+          questionDiv.innerHTML = `
+              <p><strong>Question ${index + 1}:</strong> ${q.question}</p>
+              <p>Your answer: ${q.selectedIndex !== null ? q.options[q.selectedIndex] : "Not answered"}</p>
+              <p>Correct answer: ${q.options[q.answer]}</p>
+          `;
+          reviewQuestionsContainer.appendChild(questionDiv);
+      });
+
+      document.querySelector(".review-screen").style.display = "block";
+  }
+
+  document.getElementById("finish-review-btn").addEventListener("click", () => {
+      document.querySelector(".review-screen").style.display = "none";
+      resetQuiz();
+  });
+
+  toggleViewBtn.addEventListener("click", () => {
+    const isMobile = body.classList.toggle("mobile-view");
+    if (isMobile) {
+      toggleViewBtn.textContent = "Switch to PC View";
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      toggleViewBtn.textContent = "Switch to Mobile View";
+    }
+  });
+</script>
+</body>
+</html>
